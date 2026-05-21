@@ -410,6 +410,11 @@ async function uploaderImage() {
     const d = await r.json();
     pitchData.imageUrl = d.url;
   } catch(e) {}
+  function extraireJSON(texte) {
+  const match = texte.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+  if (!match) throw new Error('Pas de JSON trouvé');
+  return JSON.parse(match[0]);
+}
   genererPitch();
 }
 
@@ -425,7 +430,7 @@ async function genererPitch() {
     const idRes = await claudeAPI(`Directeur artistique pour lycéens. Contexte: ${ctx}
 Crée une identité de marque originale.
 JSON sans markdown: {"name":"Nom 2 mots max","slogan":"Max 8 mots","mockupType":"app_mobile OU site_web OU packaging OU vetement OU cosmetique OU commerce OU tech","palette":["#hex1","#hex2","#hex3"],"secteur":"court","ambiance":"luxe OU street OU naturel OU tech OU fun OU minimal","stats":[{"label":"Stat","val":"Valeur"},{"label":"Stat","val":"Valeur"},{"label":"Stat","val":"Valeur"}]}`);
-    pitchData.identity = JSON.parse(idRes.replace(/```json\n?|```\n?/g,'').trim());
+    pitchData.identity = extraireJSON(idRes);
 
     document.getElementById('genStatus').textContent = 'Rédaction des slides…';
     const slRes = await claudeAPI(`Expert pitch investisseur lycéens. Contexte: ${ctx}
@@ -441,7 +446,7 @@ JSON sans markdown:
 {"num":8,"title":"Modèle éco","sources":[{"icon":"💳","title":"S1","amount":"X€","desc":"desc"},{"icon":"🏢","title":"S2","amount":"Y€","desc":"desc"},{"icon":"📣","title":"S3","amount":"Z€","desc":"desc"}],"seuil":"Seuil rentabilité"},
 {"num":9,"title":"Ambition","headline":"Titre","steps":[{"year":"2025","icon":"🌱","title":"T1","desc":"d"},{"year":"2026","icon":"🌿","title":"T2","desc":"d"},{"year":"2027","icon":"🌳","title":"T3","desc":"d"}]},
 {"num":10,"title":"Appel action","amount":"X 000€","usage":"Usage1 · Usage2","closing":"Phrase inspirante"}]`);
-    pitchData.slides = JSON.parse(idRes.replace(/```json\n?|```\n?/g,'').trim());
+    pitchData.slides = extraireJSON(slRes);
 
     renderResume();
     showCStep(6);
