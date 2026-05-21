@@ -294,6 +294,8 @@ async function lancerPitchs() {
   renderPitchQueue();
   resetTimer();
   goPhase(2);
+  // Afficher boutons de présentation par équipe
+  document.getElementById('pitchQueue').innerHTML += `<div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">${(session.equipes||[]).map(e=>`<a href="/deck.html?session=${sessionCode}&equipe=${encodeURIComponent(e)}" target="_blank" style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;padding:10px 16px;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);color:var(--gold);text-decoration:none;border-radius:2px;display:block;">📺 Diffuser : ${e}</a>`).join('')}</div>`;
 }
 
 function renderPitchQueue() {
