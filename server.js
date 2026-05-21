@@ -121,7 +121,7 @@ app.post('/api/claude', async (req, res) => {
       },
      body: JSON.stringify({
      model: 'claude-haiku-4-5-20251001',
-     max_tokens: 1500,
+     max_tokens: 3000,
      system: "Tu réponds UNIQUEMENT avec du JSON valide. Aucun texte avant ou après. Aucun markdown. Aucune explication.",
      messages: req.body.messages
       })
