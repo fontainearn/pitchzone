@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PitchZone — Élève</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Outfit:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--black:#0a0a0a;--white:#f5f0e8;--gold:#f5c842;--orange:#ff6b35;--green:#2ec4b6;--red:#e63946;--card:#141414;--border:#222;--muted:#555;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--black);color:var(--white);font-family:'Outfit',sans-serif;min-height:100vh;}
+header{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:rgba(10,10,10,.96);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100;}
+.logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:var(--gold);}
+.logo em{color:var(--orange);font-style:italic;}
+.badge{font-family:'DM Mono',monospace;font-size:10px;padding:4px 10px;border-radius:2px;letter-spacing:1px;border:1px solid var(--border);color:var(--muted);}
+.screen{display:none;padding:32px 20px;max-width:640px;margin:0 auto;}
+.screen.active{display:block;}
+.stag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--gold);margin-bottom:12px;text-transform:uppercase;}
+.sh1{font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,44px);font-weight:900;line-height:1.05;margin-bottom:8px;}
+.sh1 em{font-style:italic;color:var(--gold);}
+.ssub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6;}
+.info-box{background:rgba(245,200,66,.05);border:1px solid rgba(245,200,66,.15);padding:14px 18px;font-size:13px;color:#999;line-height:1.6;margin-bottom:20px;border-radius:2px;}
+.info-box strong{color:var(--gold);}
+input[type=text],textarea{width:100%;background:#0d0d0d;border:1px solid var(--border);color:var(--white);font-family:'Outfit',sans-serif;font-size:16px;padding:14px 18px;border-radius:4px;outline:none;transition:border-color .2s;}
+input:focus,textarea:focus{border-color:var(--gold);}
+textarea{resize:vertical;min-height:100px;}
+.flabel{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:8px;display:block;text-transform:uppercase;}
+.frow{margin-bottom:16px;}
+.btn{font-family:'DM Mono',monospace;font-size:13px;letter-spacing:2px;padding:14px 28px;border:none;cursor:pointer;transition:all .15s;border-radius:2px;text-transform:uppercase;width:100%;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-gold{background:var(--gold);color:var(--black);}
+.btn-gold:hover{background:#e5b830;}
+.btn-gold:disabled{opacity:.4;cursor:not-allowed;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+.waiting{text-align:center;padding:60px 20px;}
+.wait-icon{font-size:64px;animation:float 2s ease-in-out infinite alternate;margin-bottom:16px;}
+@keyframes float{from{transform:translateY(0);}to{transform:translateY(-10px);}}
+.wait-title{font-family:'Playfair Display',serif;font-size:28px;color:#333;margin-bottom:8px;}
+.wait-sub{font-size:13px;color:#222;font-family:'DM Mono',monospace;}
+.q-card{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--gold);padding:24px;margin-bottom:20px;border-radius:2px;}
+.q-from{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:2px;margin-bottom:8px;}
+.q-text{font-size:16px;line-height:1.6;margin-bottom:16px;}
+.q-hint{font-size:12px;color:#333;font-style:italic;margin-top:-8px;margin-bottom:12px;}
+.eq-choice{background:var(--card);border:2px solid var(--border);padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:12px;border-radius:4px;transition:all .2s;margin-bottom:8px;}
+.eq-choice:hover{border-color:var(--gold);}
+.eq-choice.selected{border-color:var(--gold);background:rgba(245,200,66,.06);}
+.eq-emoji{font-size:24px;}
+.eq-name{font-family:'Playfair Display',serif;font-size:20px;letter-spacing:1px;}
+.pitch-screen{text-align:center;padding:20px 0;}
+.pitch-big{font-family:'Playfair Display',serif;font-size:clamp(72px,18vw,120px);line-height:1;transition:color .3s;}
+.pitch-big.warn{color:var(--red);}
+.pitch-eq{font-family:'DM Mono',monospace;font-size:14px;color:var(--orange);letter-spacing:2px;margin-bottom:8px;}
+.tbar{height:5px;background:#1a1a1a;border-radius:3px;margin:12px 0;overflow:hidden;}
+.tbar-fill{height:100%;border-radius:3px;transition:width 1s linear;}
+.vote-card{background:var(--card);border:2px solid var(--border);padding:20px 16px;text-align:center;cursor:pointer;transition:all .2s;border-radius:6px;margin-bottom:10px;}
+.vote-card:hover{border-color:var(--gold);transform:translateY(-2px);}
+.vote-card.selected{border-color:var(--green);background:rgba(46,196,182,.08);}
+.vote-card.disabled{opacity:.35;pointer-events:none;}
+.vc-emoji{font-size:32px;margin-bottom:8px;}
+.vc-name{font-family:'Playfair Display',serif;font-size:18px;letter-spacing:1px;}
+.res-wrap{margin-bottom:12px;}
+.res-labels{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:11px;margin-bottom:4px;}
+.res-bar{height:30px;background:#1a1a1a;border-radius:2px;overflow:hidden;}
+.res-fill{height:100%;display:flex;align-items:center;padding-left:10px;font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--black);background:linear-gradient(90deg,var(--orange),var(--gold));transition:width 1.2s;min-width:36px;}
+.upload-zone{border:2px dashed var(--border);border-radius:6px;padding:28px;text-align:center;cursor:pointer;transition:border-color .2s;margin-bottom:16px;}
+.upload-zone:hover{border-color:var(--gold);}
+.upload-zone.has-img{border-color:var(--green);border-style:solid;}
+.upload-preview{max-width:100%;max-height:200px;border-radius:4px;margin-top:12px;display:none;}
+.loading-dots{display:flex;gap:8px;justify-content:center;margin:20px 0;}
+.ld{width:10px;height:10px;border-radius:50%;background:var(--gold);animation:bounce .8s ease-in-out infinite;}
+.ld:nth-child(2){animation-delay:.15s;}.ld:nth-child(3){animation-delay:.3s;}
+@keyframes bounce{0%,80%,100%{transform:scale(0.8);opacity:.4;}40%{transform:scale(1.2);opacity:1;}}
+.progress-wrap{height:2px;background:var(--border);margin-bottom:36px;border-radius:1px;}
+.progress-fill{height:100%;background:var(--gold);border-radius:1px;transition:width .5s ease;}
+.step-indicator{display:flex;gap:6px;margin-bottom:28px;}
+.sdot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .3s;}
+.sdot.active{background:var(--gold);transform:scale(1.3);}
+.sdot.done{background:var(--green);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Pitch<em>Zone</em></div>
+  <div id="equipeBadge" class="badge">—</div>
+</header>
+
+<!-- CONNEXION -->
+<div class="screen active" id="screenConnect">
+  <div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;">
+    <div style="font-family:'Playfair Display',serif;font-size:clamp(48px,12vw,80px);font-weight:900;line-height:.9;margin-bottom:12px;">Pitch<em style="color:var(--gold);">Zone</em></div>
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:#333;letter-spacing:3px;margin-bottom:40px;">SHARK TANK DE LA CLASSE</div>
+    <div style="width:100%;max-width:320px;">
+      <label class="flabel">Code de session</label>
+      <input type="text" id="codeInput" maxlength="4" placeholder="0000" style="font-family:'Playfair Display',serif;font-size:48px;letter-spacing:12px;text-align:center;padding:20px;" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeyup="if(this.value.length===4)rejoindre()">
+      <div id="codeError" style="color:var(--red);font-size:12px;font-family:'DM Mono',monospace;margin-top:8px;display:none;">❌ Code incorrect</div>
+      <button class="btn btn-gold" style="margin-top:16px;" onclick="rejoindre()">REJOINDRE →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHOIX ÉQUIPE -->
+<div class="screen" id="screenEquipe">
+  <div class="stag">Bienvenue !</div>
+  <div class="sh1">Choisis ton<br><em>équipe.</em></div>
+  <div class="ssub">Sélectionne l'enseigne de ton groupe.</div>
+  <div id="equipeList"></div>
+  <button class="btn btn-gold" onclick="validerEquipe()">REJOINDRE MON ÉQUIPE →</button>
+</div>
+
+<!-- ATTENTE -->
+<div class="screen" id="screenWait">
+  <div class="waiting">
+    <div class="wait-icon">⏳</div>
+    <div class="wait-title">En attente…</div>
+    <div class="wait-sub" id="waitSub">Le prof va lancer la prochaine phase</div>
+  </div>
+</div>
+
+<!-- FORMULAIRE CRÉATION -->
+<div class="screen" id="screenCreation">
+  <div class="progress-wrap"><div class="progress-fill" id="creaProg" style="width:0%"></div></div>
+  <div class="step-indicator" id="stepDots"></div>
+
+  <!-- STEP 1 : Concept -->
+  <div id="cStep1">
+    <div class="stag">Étape 1 · Votre concept</div>
+    <div class="sh1">Décrivez votre<br><em>idée.</em></div>
+    <div class="ssub">En 2-3 phrases : ce que vous créez, pour qui, pourquoi c'est utile.</div>
+    <div class="frow">
+      <label class="flabel">Votre concept</label>
+      <textarea id="fConcept" placeholder="Ex : Une application qui…" oninput="checkStep1()"></textarea>
+    </div>
+    <button class="btn btn-gold" id="btnStep1" onclick="soumettreStep1()" disabled>Analyser →</button>
+  </div>
+
+  <!-- STEP 2 : Questions IA -->
+  <div id="cStep2" style="display:none;">
+    <div class="stag">Étape 2 · Questions personnalisées</div>
+    <div id="qContainer"></div>
+  </div>
+
+  <!-- STEP 3 : Questions fixes -->
+  <div id="cStep3" style="display:none;">
+    <div class="stag">Étape 3 · Argumentation</div>
+    <div class="sh1">Deux questions<br><em>décisives.</em></div>
+    <div class="q-card">
+      <div class="q-from">💬 Claude vous demande</div>
+      <div class="q-text">Face à "c'est trop cher", que répondez-vous ?</div>
+      <textarea id="fObj" placeholder="Votre réponse…" oninput="checkStep3()"></textarea>
+    </div>
+    <div class="q-card">
+      <div class="q-from">💬 Claude vous demande</div>
+      <div class="q-text">En une phrase : pourquoi vous plutôt qu'un concurrent ?</div>
+      <input type="text" id="fDiff" placeholder="Votre avantage unique…" oninput="checkStep3()">
+    </div>
+    <button class="btn btn-gold" id="btnStep3" onclick="soumettreStep3()" disabled>Générer mon pitch →</button>
+  </div>
+
+  <!-- STEP 4 : Upload image -->
+  <div id="cStep4" style="display:none;">
+    <div class="stag">Étape 4 · Image produit</div>
+    <div class="sh1">Ajoutez une photo<br>de votre <em>produit.</em></div>
+    <div class="ssub">Optionnel — elle apparaîtra dans votre slide produit.</div>
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+      <div style="font-size:36px;margin-bottom:8px;">📸</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#444;letter-spacing:1px;">CLIQUER POUR CHOISIR UNE IMAGE</div>
+      <div style="font-size:11px;color:#2a2a2a;margin-top:4px;">JPG, PNG — max 5 Mo</div>
+      <img id="uploadPreview" class="upload-preview">
+    </div>
+    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="previewImage(this)">
+    <div class="btn-row" style="display:flex;flex-direction:column;gap:8px;">
+      <button class="btn btn-gold" id="btnUpload" onclick="uploaderImage()">Continuer avec cette image →</button>
+      <button class="btn btn-outline" onclick="passerUpload()">Passer cette étape →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5 : Génération -->
+  <div id="cStep5" style="display:none;">
+    <div style="text-align:center;padding:40px 0;">
+      <div class="loading-dots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div>
+      <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--gold);margin-bottom:8px;">Génération du pitch…</div>
+      <div style="font-size:13px;color:var(--muted);" id="genStatus">Claude construit votre deck</div>
+    </div>
+  </div>
+
+  <!-- STEP 6 : Résumé -->
+  <div id="cStep6" style="display:none;">
+    <div class="stag">Pitch généré !</div>
+    <div class="sh1">Votre deck est<br><em>prêt.</em></div>
+    <div id="pitchResume" style="margin-bottom:24px;"></div>
+    <button class="btn btn-gold" onclick="validerFiche()">✅ VALIDER NOTRE FICHE →</button>
+  </div>
+</div>
+
+<!-- PITCH -->
+<div class="screen" id="screenPitch">
+  <div class="stag">🎤 Pitchs en cours</div>
+  <div class="pitch-screen">
+    <div class="pitch-eq" id="pitchEqName">—</div>
+    <div class="pitch-big" id="pitchTimer">5:00</div>
+    <div class="tbar"><div class="tbar-fill" id="pitchTimerBar" style="width:100%;background:linear-gradient(90deg,var(--orange),var(--gold));"></div></div>
+    <div style="color:#2a2a2a;font-family:'DM Mono',monospace;font-size:11px;margin-top:16px;">Préparez 2 questions pour la fin du pitch</div>
+  </div>
+</div>
+
+<!-- VOTE -->
+<div class="screen" id="screenVote">
+  <div class="stag">🗳️ Vote</div>
+  <div class="sh1">Qui a le mieux<br><em>convaincu ?</em></div>
+  <div class="info-box">Votez pour le projet le plus solide — pas pour vos amis. <strong>Vous ne pouvez pas voter pour votre équipe.</strong></div>
+  <div id="voteGrid"></div>
+  <div id="voteConfirm" style="display:none;text-align:center;padding:24px;">
+    <div style="font-family:'Playfair Display',serif;font-size:26px;color:var(--green);letter-spacing:2px;">✓ VOTE ENREGISTRÉ</div>
+    <div style="color:#555;font-size:13px;margin-top:8px;">Résultats en cours…</div>
+  </div>
+</div>
+
+<!-- RÉSULTATS -->
+<div class="screen" id="screenResultats">
+  <div class="stag">🏆 Résultats</div>
+  <div id="resultatsContent"></div>
+</div>
+
+<script>
+const BASE = window.location.origin;
+let sessionCode = null;
+let ws = null;
+let session = null;
+let monEquipe = null;
+let aVote = false;
+let questions = [];
+let currentQ = 0;
+let pitchData = {};
+
+const EMOJIS = ['🦁','🐺','🦊','🦅','🐉','⚡','🔥','💎'];
+
+// ── CONNEXION ──
+async function rejoindre() {
+  const code = document.getElementById('codeInput').value.trim();
+  if (code.length !== 4) return;
+  try {
+    const r = await fetch('/api/session/join', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) });
+    if (!r.ok) { document.getElementById('codeError').style.display = 'block'; return; }
+    const d = await r.json();
+    session = d.session;
+    sessionCode = code;
+    document.getElementById('codeError').style.display = 'none';
+    showScreen('screenEquipe');
+    renderEquipes();
+    connectWS();
+  } catch(e) { document.getElementById('codeError').style.display = 'block'; }
+}
+
+function connectWS() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${proto}//${location.host}`);
+  ws.onopen = () => ws.send(JSON.stringify({ type: 'join', code: sessionCode }));
+  ws.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    if (data.type === 'state') { session = data.session; applyPhase(); }
+    if (data.type === 'vote') renderResultats(data.votes);
+  };
+  ws.onclose = () => setTimeout(connectWS, 2000);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function applyPhase() {
+  if (!session || !monEquipe) return;
+  const p = session.phase;
+  document.getElementById('equipeBadge').textContent = monEquipe;
+  if (p === 'creation') showScreen('screenCreation');
+  else if (p === 'pitchs') { showScreen('screenPitch'); updatePitchTimer(); }
+  else if (p === 'vote') { showScreen('screenVote'); renderVoteGrid(); }
+  else if (p === 'resultats') { showScreen('screenResultats'); renderResultats(session.votes); }
+  else showScreen('screenWait');
+}
+
+// ── ÉQUIPE ──
+function renderEquipes() {
+  document.getElementById('equipeList').innerHTML = (session.equipes || []).map((e, i) => `
+    <div class="eq-choice" id="eqc${i}" onclick="selectEquipe('${e}',${i})">
+      <span class="eq-emoji">${EMOJIS[i % EMOJIS.length]}</span>
+      <span class="eq-name">${e}</span>
+    </div>`).join('');
+}
+
+function selectEquipe(nom, idx) {
+  monEquipe = nom;
+  document.querySelectorAll('.eq-choice').forEach(el => el.classList.remove('selected'));
+  document.getElementById('eqc' + idx).classList.add('selected');
+}
+
+function validerEquipe() {
+  if (!monEquipe) { alert('Sélectionne ton équipe !'); return; }
+  document.getElementById('equipeBadge').textContent = monEquipe;
+  applyPhase();
+}
+
+// ── CRÉATION ──
+function showCStep(n) {
+  ['cStep1','cStep2','cStep3','cStep4','cStep5','cStep6'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('cStep' + n).style.display = 'block';
+  const pcts = {1:8,2:30,3:55,4:70,5:85,6:100};
+  document.getElementById('creaProg').style.width = (pcts[n] || 0) + '%';
+}
+
+function checkStep1() {
+  const v = document.getElementById('fConcept').value.trim();
+  document.getElementById('btnStep1').disabled = v.length < 20;
+}
+
+async function soumettreStep1() {
+  const concept = document.getElementById('fConcept').value.trim();
+  pitchData.concept = concept;
+  document.getElementById('btnStep1').disabled = true;
+  document.getElementById('btnStep1').textContent = 'Analyse…';
+  try {
+    const qs = await claudeAPI(`Tu es un coach pitch pour lycéens Bac Pro Vente (15-18 ans).
+Concept : "${concept}"
+Génère 4 questions ciblées pour construire leur pitch investisseur. Questions simples et directes.
+Réponds UNIQUEMENT en JSON sans markdown :
+[{"question":"...","hint":"..."},{"question":"...","hint":"..."},{"question":"...","hint":"..."},{"question":"...","hint":"..."}]`);
+    questions = JSON.parse(qs.replace(/```json|```/g,'').trim()).map(q => ({...q, answer:''}));
+    currentQ = 0;
+    renderQuestion(0);
+    showCStep(2);
+  } catch(e) {
+    document.getElementById('btnStep1').disabled = false;
+    document.getElementById('btnStep1').textContent = 'Analyser →';
+    alert('Erreur API. Réessayez.');
+  }
+}
+
+function renderQuestion(idx) {
+  const q = questions[idx];
+  document.getElementById('qContainer').innerHTML = `
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#333;margin-bottom:16px;letter-spacing:1px;">QUESTION ${idx+1} / ${questions.length}</div>
+    <div class="q-card">
+      <div class="q-from">💬 Claude vous demande</div>
+      <div class="q-text">${q.question}</div>
+      ${q.hint ? `<div class="q-hint">${q.hint}</div>` : ''}
+      <textarea id="curAns" placeholder="Votre réponse…" oninput="checkCurAns()">${q.answer||''}</textarea>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      ${idx > 0 ? `<button class="btn btn-outline" onclick="prevQ(${idx})">← Précédent</button>` : `<button class="btn btn-outline" onclick="showCStep(1)">← Retour</button>`}
+      <button class="btn btn-gold" id="btnNQ" onclick="nextQ(${idx})" ${q.answer?'':'disabled'}>${idx < questions.length-1 ? 'Question suivante →' : 'Continuer →'}</button>
+    </div>`;
+}
+
+function checkCurAns() {
+  const v = document.getElementById('curAns')?.value.trim();
+  const b = document.getElementById('btnNQ');
+  if (b) b.disabled = !v || v.length < 5;
+}
+
+function nextQ(idx) {
+  const v = document.getElementById('curAns').value.trim();
+  if (!v || v.length < 5) return;
+  questions[idx].answer = v;
+  if (idx < questions.length - 1) { currentQ = idx+1; renderQuestion(idx+1); }
+  else showCStep(3);
+}
+
+function prevQ(idx) {
+  const v = document.getElementById('curAns')?.value.trim();
+  if (v) questions[idx].answer = v;
+  currentQ = idx-1; renderQuestion(idx-1);
+}
+
+function checkStep3() {
+  const a = document.getElementById('fObj').value.trim();
+  const b = document.getElementById('fDiff').value.trim();
+  document.getElementById('btnStep3').disabled = !(a.length > 10 && b.length > 10);
+}
+
+function soumettreStep3() {
+  pitchData.objection = document.getElementById('fObj').value.trim();
+  pitchData.diff = document.getElementById('fDiff').value.trim();
+  showCStep(4);
+}
+
+// Upload image
+function previewImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const prev = document.getElementById('uploadPreview');
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+    document.getElementById('uploadZone').classList.add('has-img');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploaderImage() {
+  const file = document.getElementById('fileInput').files[0];
+  if (!file) { passerUpload(); return; }
+  const formData = new FormData();
+  formData.append('image', file);
+  formData.append('equipe', monEquipe);
+  try {
+    const r = await fetch(`/api/session/${sessionCode}/image`, { method: 'POST', body: formData });
+    const d = await r.json();
+    pitchData.imageUrl = d.url;
+  } catch(e) {}
+  genererPitch();
+}
+
+function passerUpload() { genererPitch(); }
+
+// Génération
+async function genererPitch() {
+  showCStep(5);
+  const ctx = `CONCEPT: ${pitchData.concept}\n${questions.map((q,i)=>`Q${i+1}: ${q.question}\nR: ${q.answer}`).join('\n')}\nOBJECTION: ${pitchData.objection}\nAVANTAGE: ${pitchData.diff}`;
+
+  try {
+    document.getElementById('genStatus').textContent = 'Génération de l\'identité visuelle…';
+    const idRes = await claudeAPI(`Directeur artistique pour lycéens. Contexte: ${ctx}
+Crée une identité de marque originale.
+JSON sans markdown: {"name":"Nom 2 mots max","slogan":"Max 8 mots","mockupType":"app_mobile OU site_web OU packaging OU vetement OU cosmetique OU commerce OU tech","palette":["#hex1","#hex2","#hex3"],"secteur":"court","ambiance":"luxe OU street OU naturel OU tech OU fun OU minimal","stats":[{"label":"Stat","val":"Valeur"},{"label":"Stat","val":"Valeur"},{"label":"Stat","val":"Valeur"}]}`);
+    pitchData.identity = JSON.parse(idRes.replace(/```json|```/g,'').trim());
+
+    document.getElementById('genStatus').textContent = 'Rédaction des slides…';
+    const slRes = await claudeAPI(`Expert pitch investisseur lycéens. Contexte: ${ctx}
+10 slides percutantes. Chiffres fictifs crédibles.
+JSON sans markdown:
+[{"num":1,"title":"Slide titre","hook":"Accroche","tagline":"Sous-titre"},
+{"num":2,"title":"Le problème","points":["Pb1 avec stat","Pb2 avec stat","Pb3 avec stat"]},
+{"num":3,"title":"La solution","headline":"Headline","steps":["Étape1","Étape2","Étape3","Étape4"]},
+{"num":4,"title":"Notre cible","persona":"Prénom, âge, profil","insight":"Citation client","stats":[{"val":"X","label":"label"},{"val":"Y","label":"label"}]},
+{"num":5,"title":"Arguments CAP","args":[{"C":"car","A":"avantage","P":"preuve"},{"C":"car","A":"avantage","P":"preuve"},{"C":"car","A":"avantage","P":"preuve"}]},
+{"num":6,"title":"Produit phare","produit":"Nom","prix":"Prix€","features":["f1","f2","f3","f4"]},
+{"num":7,"title":"Concurrence","competitors":[{"name":"C1","note":"faiblesse"},{"name":"C2","note":"faiblesse"},{"name":"C3","note":"faiblesse"}],"avantage":"Notre atout"},
+{"num":8,"title":"Modèle éco","sources":[{"icon":"💳","title":"S1","amount":"X€","desc":"desc"},{"icon":"🏢","title":"S2","amount":"Y€","desc":"desc"},{"icon":"📣","title":"S3","amount":"Z€","desc":"desc"}],"seuil":"Seuil rentabilité"},
+{"num":9,"title":"Ambition","headline":"Titre","steps":[{"year":"2025","icon":"🌱","title":"T1","desc":"d"},{"year":"2026","icon":"🌿","title":"T2","desc":"d"},{"year":"2027","icon":"🌳","title":"T3","desc":"d"}]},
+{"num":10,"title":"Appel action","amount":"X 000€","usage":"Usage1 · Usage2","closing":"Phrase inspirante"}]`);
+    pitchData.slides = JSON.parse(slRes.replace(/```json|```/g,'').trim());
+
+    renderResume();
+    showCStep(6);
+  } catch(e) { alert('Erreur génération. Réessayez.'); showCStep(3); }
+}
+
+function renderResume() {
+  const id = pitchData.identity;
+  const chips = (id.palette||[]).map(c => `<span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:${c};border:2px solid rgba(255,255,255,.1);"></span>`).join('');
+  document.getElementById('pitchResume').innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);padding:20px;border-radius:2px;margin-bottom:16px;">
+      <div style="display:flex;gap:8px;margin-bottom:8px;">${chips}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:900;color:${id.palette?.[0]||'var(--gold)'};">${id.name}</div>
+      <div style="font-size:13px;color:var(--muted);font-style:italic;">"${id.slogan}"</div>
+      <div style="margin-top:8px;font-family:'DM Mono',monospace;font-size:10px;color:#333;">${id.secteur} · ${id.ambiance} · mockup: ${id.mockupType}</div>
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#333;margin-bottom:8px;letter-spacing:1px;">10 SLIDES GÉNÉRÉES</div>
+    ${pitchData.slides.map(s => `<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="font-family:'DM Mono',monospace;color:#333;min-width:20px;">0${s.num}</span><span>${s.title}</span></div>`).join('')}
+    ${pitchData.imageUrl ? `<div style="margin-top:16px;"><img src="${pitchData.imageUrl}" style="max-width:100%;max-height:150px;border-radius:4px;border:1px solid var(--border);"></div>` : ''}`;
+}
+
+async function validerFiche() {
+  const fiche = { slogan: pitchData.identity?.slogan, identity: pitchData.identity, slides: pitchData.slides, imageUrl: pitchData.imageUrl || null };
+  await fetch(`/api/session/${sessionCode}/fiche`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ equipe: monEquipe, fiche }) });
+  showScreen('screenWait');
+  document.getElementById('waitSub').textContent = 'Fiche validée ✓ — En attente du pitch';
+}
+
+// ── PITCH TIMER ──
+function updatePitchTimer() {
+  if (!session) return;
+  const t = session.timerLeft || 0;
+  const m = Math.floor(t/60), s = t%60;
+  const d = document.getElementById('pitchTimer');
+  d.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  d.className = 'pitch-big' + (t <= 60 ? ' warn' : '');
+  document.getElementById('pitchTimerBar').style.width = (t/300*100)+'%';
+  document.getElementById('pitchTimerBar').style.background = t <= 60 ? 'linear-gradient(90deg,var(--red),var(--orange))' : 'linear-gradient(90deg,var(--orange),var(--gold))';
+  const eq = session.equipes?.[session.pitchIndex];
+  document.getElementById('pitchEqName').textContent = eq ? `🎤 ${eq}` : '✅ Pitchs terminés';
+}
+
+setInterval(() => { if (session?.phase === 'pitchs') updatePitchTimer(); }, 1000);
+
+// ── VOTE ──
+function renderVoteGrid() {
+  if (!session || aVote) return;
+  document.getElementById('voteGrid').innerHTML = (session.equipes||[]).map((e,i) => `
+    <div class="vote-card ${e === monEquipe ? 'disabled' : ''}" onclick="voter('${e}')">
+      <div class="vc-emoji">${EMOJIS[i%EMOJIS.length]}</div>
+      <div class="vc-name">${e}</div>
+      ${e === monEquipe ? '<div style="font-size:10px;color:#333;margin-top:4px;font-family:DM Mono,monospace;">TON ÉQUIPE</div>' : ''}
+    </div>`).join('');
+}
+
+async function voter(nom) {
+  if (aVote) return;
+  aVote = true;
+  await fetch(`/api/session/${sessionCode}/vote`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ equipe: nom }) });
+  document.getElementById('voteGrid').style.display = 'none';
+  document.getElementById('voteConfirm').style.display = 'block';
+}
+
+// ── RÉSULTATS ──
+function renderResultats(votes) {
+  if (!votes) return;
+  const total = Object.values(votes).reduce((a,b)=>a+b,0);
+  const sorted = Object.entries(votes).sort((a,b)=>b[1]-a[1]);
+  if (!sorted.length || total===0) return;
+  const winner = sorted[0];
+  document.getElementById('resultatsContent').innerHTML = `
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="font-size:56px;margin-bottom:8px;">🏆</div>
+      <div style="font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:var(--gold);">${winner[0]}</div>
+      <div style="color:#555;font-size:14px;">${winner[1]} vote(s) · ${Math.round(winner[1]/total*100)}%</div>
+    </div>
+    ${sorted.map(([nom,nb])=>{const pct=Math.round(nb/total*100);return`<div class="res-wrap"><div class="res-labels"><span>${nom}</span><span style="color:var(--gold)">${nb}v</span></div><div class="res-bar"><div class="res-fill" style="width:${pct}%">${pct}%</div></div></div>`;}).join('')}
+    ${monEquipe===winner[0]?'<div style="margin-top:16px;background:rgba(46,196,182,.08);border:1px solid var(--green);padding:16px;text-align:center;border-radius:2px;font-family:Playfair Display,serif;font-size:22px;color:var(--green);">🎉 VOTRE ÉQUIPE A GAGNÉ !</div>':''}`;
+}
+
+// ── API CLAUDE via serveur ──
+async function claudeAPI(prompt) {
+  const r = await fetch('/api/claude', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] }) });
+  const d = await r.json();
+  return d.content.map(b => b.text || '').join('');
+}
+</script>
+</body>
+</html>
