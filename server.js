@@ -119,10 +119,11 @@ app.post('/api/claude', async (req, res) => {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01'
       },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
-        messages: req.body.messages
+     body: JSON.stringify({
+     model: 'claude-haiku-4-5-20251001',
+     max_tokens: 1500,
+     system: "Tu réponds UNIQUEMENT avec du JSON valide. Aucun texte avant ou après. Aucun markdown. Aucune explication.",
+     messages: req.body.messages
       })
     });
     const data = await response.json();
