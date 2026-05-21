@@ -410,11 +410,6 @@ async function uploaderImage() {
     const d = await r.json();
     pitchData.imageUrl = d.url;
   } catch(e) {}
-  function extraireJSON(texte) {
-  const match = texte.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-  if (!match) throw new Error('Pas de JSON trouvé');
-  return JSON.parse(match[0]);
-}
   genererPitch();
 }
 
