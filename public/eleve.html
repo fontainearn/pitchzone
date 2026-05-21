@@ -425,7 +425,7 @@ async function genererPitch() {
     const idRes = await claudeAPI(`Directeur artistique pour lycéens. Contexte: ${ctx}
 Crée une identité de marque originale.
 JSON sans markdown: {"name":"Nom 2 mots max","slogan":"Max 8 mots","mockupType":"app_mobile OU site_web OU packaging OU vetement OU cosmetique OU commerce OU tech","palette":["#hex1","#hex2","#hex3"],"secteur":"court","ambiance":"luxe OU street OU naturel OU tech OU fun OU minimal","stats":[{"label":"Stat","val":"Valeur"},{"label":"Stat","val":"Valeur"},{"label":"Stat","val":"Valeur"}]}`);
-    pitchData.identity = extraireJSON(idRes);
+    pitchData.identity = JSON.parse(idRes.replace(/```json|```/g,'').trim());
 
     document.getElementById('genStatus').textContent = 'Rédaction des slides…';
     const slRes = await claudeAPI(`Expert pitch investisseur lycéens. Contexte: ${ctx}
@@ -441,7 +441,7 @@ JSON sans markdown:
 {"num":8,"title":"Modèle éco","sources":[{"icon":"💳","title":"S1","amount":"X€","desc":"desc"},{"icon":"🏢","title":"S2","amount":"Y€","desc":"desc"},{"icon":"📣","title":"S3","amount":"Z€","desc":"desc"}],"seuil":"Seuil rentabilité"},
 {"num":9,"title":"Ambition","headline":"Titre","steps":[{"year":"2025","icon":"🌱","title":"T1","desc":"d"},{"year":"2026","icon":"🌿","title":"T2","desc":"d"},{"year":"2027","icon":"🌳","title":"T3","desc":"d"}]},
 {"num":10,"title":"Appel action","amount":"X 000€","usage":"Usage1 · Usage2","closing":"Phrase inspirante"}]`);
-    pitchData.slides = extraireJSON(slRes);
+    pitchData.slides = JSON.parse(slRes.replace(/```json|```/g,'').trim());
 
     renderResume();
     showCStep(6);
@@ -468,8 +468,16 @@ async function validerFiche() {
   await fetch(`/api/session/${sessionCode}/fiche`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ equipe: monEquipe, fiche }) });
   showScreen('screenWait');
   document.getElementById('waitSub').textContent = 'Fiche validée ✓ — En attente du pitch';
-  // Bouton pour voir la présentation
-  document.getElementById('screenWait').innerHTML += `<div style="margin-top:24px;"><a href="/deck.html?session=${sessionCode}&equipe=${encodeURIComponent(monEquipe)}" target="_blank" style="font-family:'DM Mono',monospace;font-size:13px;letter-spacing:2px;padding:14px 28px;background:var(--gold);color:var(--black);text-decoration:none;border-radius:2px;display:inline-block;">🎤 VOIR MA PRÉSENTATION →</a></div>`;
+  // Ajouter bouton voir présentation
+  const waitDiv = document.getElementById('screenWait');
+  const existing = waitDiv.querySelector('.deck-link-btn');
+  if (!existing) {
+    const btn = document.createElement('div');
+    btn.className = 'deck-link-btn';
+    btn.style.cssText = 'margin-top:28px;text-align:center;';
+    btn.innerHTML = `<a href="/deck.html?session=${sessionCode}&equipe=${encodeURIComponent(monEquipe)}" target="_blank" style="font-family:'DM Mono',monospace;font-size:12px;letter-spacing:2px;padding:14px 28px;background:var(--gold);color:var(--black);text-decoration:none;border-radius:2px;display:inline-block;">🎤 VOIR MA PRÉSENTATION →</a><div style="margin-top:10px;font-size:11px;color:#333;font-family:'DM Mono',monospace;">Ouvre dans un nouvel onglet</div>`;
+    waitDiv.appendChild(btn);
+  }
 }
 
 // ── PITCH TIMER ──
@@ -523,11 +531,7 @@ function renderResultats(votes) {
     ${sorted.map(([nom,nb])=>{const pct=Math.round(nb/total*100);return`<div class="res-wrap"><div class="res-labels"><span>${nom}</span><span style="color:var(--gold)">${nb}v</span></div><div class="res-bar"><div class="res-fill" style="width:${pct}%">${pct}%</div></div></div>`;}).join('')}
     ${monEquipe===winner[0]?'<div style="margin-top:16px;background:rgba(46,196,182,.08);border:1px solid var(--green);padding:16px;text-align:center;border-radius:2px;font-family:Playfair Display,serif;font-size:22px;color:var(--green);">🎉 VOTRE ÉQUIPE A GAGNÉ !</div>':''}`;
 }
-function extraireJSON(texte) {
-  const match = texte.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
-  if (!match) throw new Error('Pas de JSON trouvé');
-  return JSON.parse(match[0]);
-}
+
 // ── API CLAUDE via serveur ──
 async function claudeAPI(prompt) {
   const r = await fetch('/api/claude', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] }) });
