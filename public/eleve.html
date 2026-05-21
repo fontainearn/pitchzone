@@ -468,6 +468,8 @@ async function validerFiche() {
   await fetch(`/api/session/${sessionCode}/fiche`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ equipe: monEquipe, fiche }) });
   showScreen('screenWait');
   document.getElementById('waitSub').textContent = 'Fiche validée ✓ — En attente du pitch';
+  // Bouton pour voir la présentation
+  document.getElementById('screenWait').innerHTML += `<div style="margin-top:24px;"><a href="/deck.html?session=${sessionCode}&equipe=${encodeURIComponent(monEquipe)}" target="_blank" style="font-family:'DM Mono',monospace;font-size:13px;letter-spacing:2px;padding:14px 28px;background:var(--gold);color:var(--black);text-decoration:none;border-radius:2px;display:inline-block;">🎤 VOIR MA PRÉSENTATION →</a></div>`;
 }
 
 // ── PITCH TIMER ──
