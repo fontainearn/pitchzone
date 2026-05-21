@@ -159,6 +159,9 @@ header{padding:16px 32px;display:flex;align-items:center;justify-content:space-b
         <button class="btn btn-orange" onclick="pitchSuivant()">SUIVANT →</button>
       </div>
     </div>
+    <hr style="border:none;border-top:1px solid var(--border);margin:24px 0;">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:#555;letter-spacing:2px;margin-bottom:12px;">📺 OUVRIR UNE PRÉSENTATION</div>
+    <div id="deckLinks" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;"></div>
     <div class="btn-row">
       <button class="btn btn-gold" onclick="lancerVote()">🗳️ PASSER AU VOTE →</button>
     </div>
@@ -293,9 +296,23 @@ async function lancerPitchs() {
   await updateSession({ phase: 'pitchs', pitchIndex: 0, timerLeft: 300, timerRunning: false });
   renderPitchQueue();
   resetTimer();
+  renderDeckLinks();
   goPhase(2);
-  // Afficher boutons de présentation par équipe
-  document.getElementById('pitchQueue').innerHTML += `<div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">${(session.equipes||[]).map(e=>`<a href="/deck.html?session=${sessionCode}&equipe=${encodeURIComponent(e)}" target="_blank" style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;padding:10px 16px;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.3);color:var(--gold);text-decoration:none;border-radius:2px;display:block;">📺 Diffuser : ${e}</a>`).join('')}</div>`;
+}
+
+function renderDeckLinks() {
+  const equipes = session?.equipes || [];
+  const links = document.getElementById('deckLinks');
+  if (!links) return;
+  links.innerHTML = equipes.map(e => `
+    <a href="/deck.html?session=${sessionCode}&equipe=${encodeURIComponent(e)}" target="_blank"
+       style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;padding:12px 18px;
+       background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.25);color:var(--gold);
+       text-decoration:none;border-radius:2px;display:flex;align-items:center;gap:10px;transition:all .2s;"
+       onmouseover="this.style.background='rgba(245,200,66,.15)'"
+       onmouseout="this.style.background='rgba(245,200,66,.08)'">
+      📺 ${e}
+    </a>`).join('');
 }
 
 function renderPitchQueue() {
@@ -412,4 +429,3 @@ init();
 </script>
 </body>
 </html>
-
