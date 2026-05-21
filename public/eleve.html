@@ -521,7 +521,11 @@ function renderResultats(votes) {
     ${sorted.map(([nom,nb])=>{const pct=Math.round(nb/total*100);return`<div class="res-wrap"><div class="res-labels"><span>${nom}</span><span style="color:var(--gold)">${nb}v</span></div><div class="res-bar"><div class="res-fill" style="width:${pct}%">${pct}%</div></div></div>`;}).join('')}
     ${monEquipe===winner[0]?'<div style="margin-top:16px;background:rgba(46,196,182,.08);border:1px solid var(--green);padding:16px;text-align:center;border-radius:2px;font-family:Playfair Display,serif;font-size:22px;color:var(--green);">🎉 VOTRE ÉQUIPE A GAGNÉ !</div>':''}`;
 }
-
+function extraireJSON(texte) {
+  const match = texte.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+  if (!match) throw new Error('Pas de JSON trouvé');
+  return JSON.parse(match[0]);
+}
 // ── API CLAUDE via serveur ──
 async function claudeAPI(prompt) {
   const r = await fetch('/api/claude', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: [{ role: 'user', content: prompt }] }) });
