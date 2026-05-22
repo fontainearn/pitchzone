@@ -12,7 +12,7 @@ const wss = new WebSocket.Server({ server });
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static('public', { etag: false, maxAge: 0 }));
+app.use(express.static(require('path').join(__dirname, 'public'), { etag: false, maxAge: 0 }));
 app.use('/uploads', express.static('uploads'));
 
 // Dossier uploads
